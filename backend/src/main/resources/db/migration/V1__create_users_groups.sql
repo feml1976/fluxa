@@ -87,7 +87,7 @@ VALUES ('Familia Principal', 'Grupo familiar por defecto');
 INSERT INTO users (email, password_hash, first_name, last_name, role, group_id)
 VALUES (
     'admin@fluxa.local',
-    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQyCgT9XR1B0lHU5FGW3CZuLu',
+    '$2a$12$DyZ7Eqw8Aqy1p2fs.uIZ4OdYkVLENxtYsEOoMrZYB4JOuMkeBK77y',
     'Admin',
     'FLUXA',
     'ADMIN',
