@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "FLUXA — PostgreSQL Local",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "fluxa_db",
+      "Username": "fluxa_user",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpass"
+    }
+  }
+}

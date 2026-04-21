@@ -1,0 +1,83 @@
+# ============================================================
+# FLUXA — .gitignore
+# ============================================================
+
+# ── Variables de entorno (CRÍTICO — nunca commitear) ─────────
+.env
+.env.local
+.env.production
+.env.*.local
+backend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ── Java / Maven ─────────────────────────────────────────────
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+.m2/
+hs_err_pid*
+
+# ── Spring Boot ───────────────────────────────────────────────
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-secrets.yml
+
+# ── Node.js / Frontend ───────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/build/
+
+# ── IDEs ─────────────────────────────────────────────────────
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.factorypath
+*.iws
+out/
+
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+
+# ── Sistema Operativo ────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# ── Docker — volúmenes locales ───────────────────────────────
+docker/volumes/
+postgres-data/
+
+# ── Logs ─────────────────────────────────────────────────────
+logs/
+*.log
+*.log.*
+
+# ── Archivos temporales ──────────────────────────────────────
+*.tmp
+*.bak
+*.orig
+*.swp
+*.swo
+
+# ── Certificados y claves (NUNCA en el repo) ─────────────────
+*.p12
+*.jks
+*.keystore
+*.pfx
+*.pem
+*.key
+*.crt
+secrets/
+
+# ── Reportes y coverage ──────────────────────────────────────
+coverage/
+test-results/
+backend/target/surefire-reports/

@@ -1,0 +1,92 @@
+# ============================================================
+# FLUXA — Docker Compose
+# Infraestructura local de desarrollo
+# PostgreSQL 18 + pgAdmin (opcional)
+# ============================================================
+# Uso:
+#   docker-compose up -d          ← levantar en background
+#   docker-compose down           ← detener y eliminar contenedores
+#   docker-compose logs -f        ← ver logs en tiempo real
+#   docker-compose down -v        ← detener + eliminar volúmenes (¡borra datos!)
+# ============================================================
+
+services:
+
+  # ──────────────────────────────────────────────────────────
+  # PostgreSQL 18 — Base de datos principal
+  # ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:18-alpine
+    container_name: fluxa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fluxa_db}
+      POSTGRES_USER: ${POSTGRES_USER:-fluxa_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fluxa_local_pass}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      # Zona horaria del servidor de base de datos
+      TZ: America/Bogota
+      PGTZ: America/Bogota
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # Persistencia de datos entre reinicios del contenedor
+      - fluxa_postgres_data:/var/lib/postgresql/data
+      # Script de inicialización (se ejecuta solo si el volumen está vacío)
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fluxa_user} -d ${POSTGRES_DB:-fluxa_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - fluxa-network
+
+  # ──────────────────────────────────────────────────────────
+  # pgAdmin 4 — Administrador web de PostgreSQL (opcional)
+  # Acceder en: http://localhost:5050
+  # ──────────────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: fluxa-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@fluxa.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - fluxa_pgadmin_data:/var/lib/pgadmin
+      # Pre-configura la conexión al servidor PostgreSQL
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fluxa-network
+    profiles:
+      # pgAdmin solo arranca si se especifica el perfil:
+      # docker-compose --profile tools up -d
+      - tools
+
+# ──────────────────────────────────────────────────────────
+# Volúmenes persistentes
+# ──────────────────────────────────────────────────────────
+volumes:
+  fluxa_postgres_data:
+    driver: local
+    name: fluxa_postgres_data
+  fluxa_pgadmin_data:
+    driver: local
+    name: fluxa_pgadmin_data
+
+# ──────────────────────────────────────────────────────────
+# Red interna del proyecto
+# ──────────────────────────────────────────────────────────
+networks:
+  fluxa-network:
+    driver: bridge
+    name: fluxa-network
