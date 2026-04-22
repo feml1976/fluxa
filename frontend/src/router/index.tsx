@@ -1,11 +1,12 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from '@/shared/components/ProtectedRoute';
 import LoginPage from '@/modules/auth/pages/LoginPage';
+import IncomePage from '@/modules/income/pages/IncomePage';
+import CommitmentPage from '@/modules/commitment/pages/CommitmentPage';
 
-// Placeholder del Dashboard hasta Sprint 3
 const DashboardPage = () => (
   <div style={{ padding: 32 }}>
-    <h2>Dashboard — Próximamente</h2>
+    <h2>Dashboard — Sprint 3</h2>
   </div>
 );
 
@@ -19,7 +20,9 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'dashboard',    element: <DashboardPage /> },
+      { path: 'income',       element: <IncomePage /> },
+      { path: 'commitments',  element: <CommitmentPage /> },
     ],
   },
   {
