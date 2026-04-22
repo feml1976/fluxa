@@ -7,6 +7,8 @@ import com.fml.fluxa.dashboard.application.dto.DashboardSummaryResponse;
 import com.fml.fluxa.dashboard.application.dto.DashboardSummaryResponse.HealthStatus;
 import com.fml.fluxa.dashboard.application.dto.TopExpenseDto;
 import com.fml.fluxa.dashboard.application.dto.UpcomingPaymentDto;
+import com.fml.fluxa.credit.infrastructure.persistence.CreditCardJpaRepository;
+import com.fml.fluxa.credit.infrastructure.persistence.CreditJpaRepository;
 import com.fml.fluxa.expense.infrastructure.persistence.BudgetPlanJpaRepository;
 import com.fml.fluxa.expense.infrastructure.persistence.ExpenseCategoryJpaRepository;
 import com.fml.fluxa.expense.infrastructure.persistence.VariableExpenseJpaRepository;
@@ -31,6 +33,8 @@ public class GetDashboardSummaryUseCase {
     private final VariableExpenseJpaRepository expenseRepo;
     private final BudgetPlanJpaRepository budgetRepo;
     private final ExpenseCategoryJpaRepository categoryRepo;
+    private final CreditJpaRepository creditRepo;
+    private final CreditCardJpaRepository creditCardRepo;
 
     public GetDashboardSummaryUseCase(
             IncomeRecordJpaRepository incomeRecordRepo,
@@ -38,13 +42,17 @@ public class GetDashboardSummaryUseCase {
             FixedCommitmentJpaRepository commitmentRepo,
             VariableExpenseJpaRepository expenseRepo,
             BudgetPlanJpaRepository budgetRepo,
-            ExpenseCategoryJpaRepository categoryRepo) {
+            ExpenseCategoryJpaRepository categoryRepo,
+            CreditJpaRepository creditRepo,
+            CreditCardJpaRepository creditCardRepo) {
         this.incomeRecordRepo = incomeRecordRepo;
         this.commitmentRecordRepo = commitmentRecordRepo;
         this.commitmentRepo = commitmentRepo;
         this.expenseRepo = expenseRepo;
         this.budgetRepo = budgetRepo;
         this.categoryRepo = categoryRepo;
+        this.creditRepo = creditRepo;
+        this.creditCardRepo = creditCardRepo;
     }
 
     @Transactional(readOnly = true)
@@ -66,14 +74,19 @@ public class GetDashboardSummaryUseCase {
         BigDecimal totalExpenses = expenseRepo.sumByUserAndPeriod(userId, month, year);
         BigDecimal totalPlanned = budgetRepo.sumPlannedByPeriod(userId, month, year);
 
-        // Flujo neto
-        BigDecimal netFlow = totalIncome.subtract(totalCommitments).subtract(totalExpenses);
+        // Obligaciones de crédito del mes (cuotas + mínimos tarjetas)
+        BigDecimal totalCreditObligations = creditRepo.sumMonthlyInstallmentsByUser(userId)
+                .add(creditCardRepo.sumMinimumPaymentsByUser(userId));
 
-        // Indicador de salud financiera
+        // Flujo neto (incluye créditos)
+        BigDecimal netFlow = totalIncome.subtract(totalCommitments)
+                .subtract(totalExpenses).subtract(totalCreditObligations);
+
+        // Indicador de salud financiera (incluye créditos en obligaciones)
         BigDecimal commitmentRatio = BigDecimal.ZERO;
         HealthStatus healthStatus = HealthStatus.GREEN;
         if (totalIncomeExpected.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal obligations = totalCommitments.add(totalExpenses);
+            BigDecimal obligations = totalCommitments.add(totalExpenses).add(totalCreditObligations);
             commitmentRatio = obligations
                     .multiply(new BigDecimal("100"))
                     .divide(totalIncomeExpected, 2, RoundingMode.HALF_UP);

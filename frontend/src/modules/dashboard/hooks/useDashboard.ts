@@ -6,3 +6,15 @@ export const useDashboardSummary = (month: number, year: number) =>
     queryKey: ['dashboard', month, year],
     queryFn: () => dashboardApi.getSummary(month, year),
   });
+
+export const useDashboardProjections = (months: number) =>
+  useQuery({
+    queryKey: ['dashboard', 'projections', months],
+    queryFn: () => dashboardApi.getProjections(months),
+  });
+
+export const useDebtStrategies = () =>
+  useQuery({
+    queryKey: ['dashboard', 'debt-strategy'],
+    queryFn: dashboardApi.getDebtStrategies,
+  });

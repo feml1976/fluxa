@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from '@/shared/components/ProtectedRoute';
+import AppLayout from '@/shared/components/AppLayout';
 import LoginPage from '@/modules/auth/pages/LoginPage';
 import IncomePage from '@/modules/income/pages/IncomePage';
 import CommitmentPage from '@/modules/commitment/pages/CommitmentPage';
@@ -16,12 +17,17 @@ export const router = createBrowserRouter([
     path: '/',
     element: <ProtectedRoute />,
     children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard',    element: <DashboardPage /> },
-      { path: 'income',       element: <IncomePage /> },
-      { path: 'commitments',  element: <CommitmentPage /> },
-      { path: 'expenses',     element: <ExpensePage /> },
-      { path: 'credits',      element: <CreditPage /> },
+      {
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <Navigate to="/dashboard" replace /> },
+          { path: 'dashboard',   element: <DashboardPage /> },
+          { path: 'income',      element: <IncomePage /> },
+          { path: 'commitments', element: <CommitmentPage /> },
+          { path: 'expenses',    element: <ExpensePage /> },
+          { path: 'credits',     element: <CreditPage /> },
+        ],
+      },
     ],
   },
   {
