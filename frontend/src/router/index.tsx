@@ -5,6 +5,7 @@ import IncomePage from '@/modules/income/pages/IncomePage';
 import CommitmentPage from '@/modules/commitment/pages/CommitmentPage';
 import { ExpensePage } from '@/modules/expense/pages/ExpensePage';
 import { DashboardPage } from '@/modules/dashboard/pages/DashboardPage';
+import { CreditPage } from '@/modules/credit/pages/CreditPage';
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       { path: 'income',       element: <IncomePage /> },
       { path: 'commitments',  element: <CommitmentPage /> },
       { path: 'expenses',     element: <ExpensePage /> },
+      { path: 'credits',      element: <CreditPage /> },
     ],
   },
   {
