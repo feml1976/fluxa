@@ -1,0 +1,137 @@
+package com.fml.fluxa.dashboard.application.usecase;
+
+import com.fml.fluxa.commitment.domain.model.CommitmentStatus;
+import com.fml.fluxa.commitment.infrastructure.persistence.CommitmentRecordJpaRepository;
+import com.fml.fluxa.commitment.infrastructure.persistence.FixedCommitmentJpaRepository;
+import com.fml.fluxa.dashboard.application.dto.DashboardSummaryResponse;
+import com.fml.fluxa.dashboard.application.dto.DashboardSummaryResponse.HealthStatus;
+import com.fml.fluxa.dashboard.application.dto.TopExpenseDto;
+import com.fml.fluxa.dashboard.application.dto.UpcomingPaymentDto;
+import com.fml.fluxa.expense.infrastructure.persistence.BudgetPlanJpaRepository;
+import com.fml.fluxa.expense.infrastructure.persistence.ExpenseCategoryJpaRepository;
+import com.fml.fluxa.expense.infrastructure.persistence.VariableExpenseJpaRepository;
+import com.fml.fluxa.income.infrastructure.persistence.IncomeRecordJpaRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+public class GetDashboardSummaryUseCase {
+
+    private final IncomeRecordJpaRepository incomeRecordRepo;
+    private final CommitmentRecordJpaRepository commitmentRecordRepo;
+    private final FixedCommitmentJpaRepository commitmentRepo;
+    private final VariableExpenseJpaRepository expenseRepo;
+    private final BudgetPlanJpaRepository budgetRepo;
+    private final ExpenseCategoryJpaRepository categoryRepo;
+
+    public GetDashboardSummaryUseCase(
+            IncomeRecordJpaRepository incomeRecordRepo,
+            CommitmentRecordJpaRepository commitmentRecordRepo,
+            FixedCommitmentJpaRepository commitmentRepo,
+            VariableExpenseJpaRepository expenseRepo,
+            BudgetPlanJpaRepository budgetRepo,
+            ExpenseCategoryJpaRepository categoryRepo) {
+        this.incomeRecordRepo = incomeRecordRepo;
+        this.commitmentRecordRepo = commitmentRecordRepo;
+        this.commitmentRepo = commitmentRepo;
+        this.expenseRepo = expenseRepo;
+        this.budgetRepo = budgetRepo;
+        this.categoryRepo = categoryRepo;
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardSummaryResponse getSummary(Long userId, int month, int year) {
+        // Ingresos
+        BigDecimal totalIncome = incomeRecordRepo.sumReceivedByPeriod(userId, month, year);
+        BigDecimal totalIncomeExpected = incomeRecordRepo.sumExpectedByPeriod(userId, month, year);
+
+        // Compromisos
+        var commitmentRecords = commitmentRecordRepo.findByUserIdAndPeriodMonthAndPeriodYear(userId, month, year);
+        BigDecimal totalCommitments = commitmentRecordRepo.sumEstimatedByPeriod(userId, month, year);
+        BigDecimal totalCommitmentsPaid = commitmentRecordRepo.sumPaidByPeriod(userId, month, year);
+        long pendingCount = commitmentRecords.stream()
+                .filter(r -> r.getStatus() == CommitmentStatus.PENDING).count();
+        long overdueCount = commitmentRecords.stream()
+                .filter(r -> r.getStatus() == CommitmentStatus.OVERDUE).count();
+
+        // Gastos variables
+        BigDecimal totalExpenses = expenseRepo.sumByUserAndPeriod(userId, month, year);
+        BigDecimal totalPlanned = budgetRepo.sumPlannedByPeriod(userId, month, year);
+
+        // Flujo neto
+        BigDecimal netFlow = totalIncome.subtract(totalCommitments).subtract(totalExpenses);
+
+        // Indicador de salud financiera
+        BigDecimal commitmentRatio = BigDecimal.ZERO;
+        HealthStatus healthStatus = HealthStatus.GREEN;
+        if (totalIncomeExpected.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal obligations = totalCommitments.add(totalExpenses);
+            commitmentRatio = obligations
+                    .multiply(new BigDecimal("100"))
+                    .divide(totalIncomeExpected, 2, RoundingMode.HALF_UP);
+            if (commitmentRatio.compareTo(new BigDecimal("60")) > 0) {
+                healthStatus = HealthStatus.RED;
+            } else if (commitmentRatio.compareTo(new BigDecimal("40")) > 0) {
+                healthStatus = HealthStatus.YELLOW;
+            }
+        }
+
+        // Próximos vencimientos (próximos 7 días)
+        LocalDate today = LocalDate.now();
+        Map<Long, String> commitmentNames = commitmentRepo.findByUserIdAndIsActiveTrueAndDeletedAtIsNull(userId)
+                .stream()
+                .collect(Collectors.toMap(c -> c.getId(), c -> c.getName()));
+
+        List<UpcomingPaymentDto> upcoming = commitmentRecordRepo
+                .findUpcomingPending(userId, today, today.plusDays(7))
+                .stream()
+                .map(r -> new UpcomingPaymentDto(
+                        r.getCommitmentId(),
+                        commitmentNames.getOrDefault(r.getCommitmentId(), "Sin nombre"),
+                        r.getEstimatedAmount(),
+                        r.getDueDate(),
+                        (int) ChronoUnit.DAYS.between(today, r.getDueDate())
+                ))
+                .toList();
+
+        // Top 5 categorías de gasto
+        Map<Long, String> catNames = categoryRepo.findByUserIdAndDeletedAtIsNullOrderByNameAsc(userId)
+                .stream()
+                .collect(Collectors.toMap(c -> c.getId(), c -> c.getName()));
+
+        List<TopExpenseDto> topExpenses = expenseRepo.findTop5CategoriesByPeriod(userId, month, year)
+                .stream()
+                .map(p -> {
+                    double pct = totalExpenses.compareTo(BigDecimal.ZERO) > 0
+                            ? p.getTotal().multiply(new BigDecimal("100"))
+                                    .divide(totalExpenses, 2, RoundingMode.HALF_UP)
+                                    .doubleValue()
+                            : 0.0;
+                    return new TopExpenseDto(
+                            p.getCategoryId(),
+                            catNames.getOrDefault(p.getCategoryId(), "Sin categoría"),
+                            p.getTotal(),
+                            pct);
+                })
+                .toList();
+
+        return new DashboardSummaryResponse(
+                month, year,
+                totalIncome, totalIncomeExpected,
+                totalCommitments, totalCommitmentsPaid,
+                (int) pendingCount, (int) overdueCount,
+                totalExpenses, totalPlanned,
+                netFlow,
+                commitmentRatio, healthStatus,
+                upcoming, topExpenses
+        );
+    }
+}
