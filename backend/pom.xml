@@ -97,6 +97,13 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
+        <!-- ── Importación Excel/CSV ─────────────────────────── -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.3.0</version>
+        </dependency>
+
         <!-- ── Lombok ────────────────────────────────────────── -->
         <dependency>
             <groupId>org.projectlombok</groupId>

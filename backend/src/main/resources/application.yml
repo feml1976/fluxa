@@ -74,6 +74,11 @@ fluxa:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
+  notification:
+    alert-days-before: ${NOTIFICATION_ALERT_DAYS:3}
+    from-name: "FLUXA — Gestión Financiera"
+    scheduler-cron: "0 0 8 * * *"    # 8:00 AM diario (zona America/Bogota)
+
 management:
   endpoints:
     web:

@@ -10,6 +10,8 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -19,11 +21,13 @@ import { useDashboardSummary } from '../../modules/dashboard/hooks/useDashboard'
 const DRAWER_WIDTH = 240;
 
 const NAV_ITEMS = [
-  { label: 'Dashboard',     path: '/dashboard',    icon: <DashboardIcon /> },
-  { label: 'Ingresos',      path: '/income',       icon: <TrendingUpIcon /> },
-  { label: 'Compromisos',   path: '/commitments',  icon: <AssignmentIcon /> },
-  { label: 'Gastos',        path: '/expenses',     icon: <ShoppingCartIcon /> },
-  { label: 'Créditos',      path: '/credits',      icon: <CreditCardIcon /> },
+  { label: 'Dashboard',      path: '/dashboard',      icon: <DashboardIcon /> },
+  { label: 'Ingresos',       path: '/income',         icon: <TrendingUpIcon /> },
+  { label: 'Compromisos',    path: '/commitments',    icon: <AssignmentIcon /> },
+  { label: 'Gastos',         path: '/expenses',       icon: <ShoppingCartIcon /> },
+  { label: 'Créditos',       path: '/credits',        icon: <CreditCardIcon /> },
+  { label: 'Notificaciones', path: '/notifications',  icon: <NotificationsIcon /> },
+  { label: 'Importar',       path: '/import',         icon: <UploadFileIcon /> },
 ];
 
 const HEALTH_COLORS = {
