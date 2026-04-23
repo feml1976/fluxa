@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from '@/shared/components/ProtectedRoute';
 import AppLayout from '@/shared/components/AppLayout';
 import LoginPage from '@/modules/auth/pages/LoginPage';
+import RegisterPage from '@/modules/auth/pages/RegisterPage';
 import IncomePage from '@/modules/income/pages/IncomePage';
 import CommitmentPage from '@/modules/commitment/pages/CommitmentPage';
 import { ExpensePage } from '@/modules/expense/pages/ExpensePage';
@@ -14,6 +15,10 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
   },
   {
     path: '/',
