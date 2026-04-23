@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useLogin } from '../hooks/useLogin';
+import { extractApiError } from '@/shared/utils/apiError';
 
 const schema = z.object({
   email: z.string().email('Formato de email inválido'),
@@ -27,10 +28,7 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = (data: FormData) => login(data);
 
-  const errorMessage = error
-    ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
-      ?? 'Error al iniciar sesión'
-    : null;
+  const errorMessage = error ? extractApiError(error, 'Error al iniciar sesión') : null;
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>

@@ -9,6 +9,10 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useRegister } from '../hooks/useRegister';
+import { extractApiError } from '@/shared/utils/apiError';
+
+// Regex sincronizado con el backend: solo acepta @$!%*?&
+const SPECIAL_CHARS = /[@$!%*?&]/;
 
 const schema = z.object({
   firstName: z.string().min(2, 'Mínimo 2 caracteres'),
@@ -18,7 +22,7 @@ const schema = z.object({
     .min(8, 'Mínimo 8 caracteres')
     .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
     .regex(/[0-9]/, 'Debe contener al menos un número')
-    .regex(/[!@#$%^&*]/, 'Debe contener al menos un carácter especial (!@#$%^&*)'),
+    .regex(SPECIAL_CHARS, 'Debe contener al menos un carácter especial (@$!%*?&)'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -33,10 +37,7 @@ const RegisterForm: React.FC = () => {
 
   const onSubmit = (data: FormData) => register(data);
 
-  const errorMessage = error
-    ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
-      ?? 'Error al registrar la cuenta'
-    : null;
+  const errorMessage = error ? extractApiError(error, 'Error al registrar la cuenta') : null;
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
