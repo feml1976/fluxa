@@ -5,6 +5,9 @@ import com.fml.fluxa.credit.application.dto.*;
 import com.fml.fluxa.credit.application.usecase.CreditAnalysisUseCase;
 import com.fml.fluxa.credit.application.usecase.CreditUseCase;
 import com.fml.fluxa.shared.infrastructure.web.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Créditos y Deudas", description = "Créditos tradicionales, hipotecarios, de vehículo y tarjetas de crédito")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/v1/credits")
 public class CreditController {
@@ -39,6 +44,7 @@ public class CreditController {
         return ResponseEntity.ok(ApiResponse.ok(creditUseCase.listByUser(user.getId())));
     }
 
+    @Operation(summary = "Resumen consolidado de todas las deudas del usuario")
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<CreditSummaryResponse>> getSummary(
             @AuthenticationPrincipal User user) {
@@ -68,6 +74,7 @@ public class CreditController {
         return ResponseEntity.ok(ApiResponse.ok("Crédito eliminado", null));
     }
 
+    @Operation(summary = "Análisis de crédito: amortización, % utilización, alertas y estrategias de pago")
     @GetMapping("/{id}/analysis")
     public ResponseEntity<ApiResponse<CreditAnalysisResponse>> analyze(
             @AuthenticationPrincipal User user,

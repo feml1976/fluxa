@@ -4,6 +4,9 @@ import com.fml.fluxa.auth.domain.model.User;
 import com.fml.fluxa.income.application.dto.*;
 import com.fml.fluxa.income.application.usecase.*;
 import com.fml.fluxa.shared.infrastructure.web.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Ingresos", description = "Categorías de ingreso, fuentes y registros mensuales")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/v1/income")
 public class IncomeController {

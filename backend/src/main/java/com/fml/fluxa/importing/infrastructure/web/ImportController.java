@@ -5,11 +5,16 @@ import com.fml.fluxa.importing.application.dto.ImportExecuteResponse;
 import com.fml.fluxa.importing.application.dto.ImportPreviewResponse;
 import com.fml.fluxa.importing.application.service.ImportService;
 import com.fml.fluxa.shared.infrastructure.web.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "Importación", description = "Carga masiva de datos desde archivos CSV o Excel (.xlsx)")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/v1/import")
 public class ImportController {

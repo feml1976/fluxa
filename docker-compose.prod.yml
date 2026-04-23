@@ -1,0 +1,114 @@
+# ============================================================
+# FLUXA — Docker Compose PRODUCCIÓN
+# Orquesta los 3 servicios: PostgreSQL + Backend + Frontend
+# ============================================================
+# Uso:
+#   docker-compose -f docker-compose.prod.yml up -d --build
+#   docker-compose -f docker-compose.prod.yml logs -f
+#   docker-compose -f docker-compose.prod.yml down
+# ============================================================
+# Variables requeridas en .env:
+#   POSTGRES_PASSWORD   — obligatoria, sin valor por defecto
+#   JWT_SECRET          — obligatoria, mínimo 64 caracteres
+#   MAIL_USERNAME       — opcional
+#   MAIL_PASSWORD       — opcional
+# ============================================================
+
+services:
+
+  # ──────────────────────────────────────────────────────────
+  # PostgreSQL 18 — Base de datos
+  # Puerto NO expuesto en producción (solo acceso interno)
+  # ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:18-alpine
+    container_name: fluxa-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-fluxa_db}
+      POSTGRES_USER:     ${POSTGRES_USER:-fluxa_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ:                America/Bogota
+      PGTZ:              America/Bogota
+    volumes:
+      - fluxa_postgres_prod:/var/lib/postgresql/data/pgdata
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fluxa_user} -d ${POSTGRES_DB:-fluxa_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - fluxa-net-prod
+
+  # ──────────────────────────────────────────────────────────
+  # Backend — Spring Boot 3.5 / Java 21
+  # Puerto NO expuesto; nginx actúa como proxy inverso
+  # ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: fluxa-backend:latest
+    container_name: fluxa-backend-prod
+    restart: unless-stopped
+    environment:
+      DB_URL:                jdbc:postgresql://postgres:5432/${POSTGRES_DB:-fluxa_db}
+      DB_USERNAME:           ${POSTGRES_USER:-fluxa_user}
+      DB_PASSWORD:           ${POSTGRES_PASSWORD}
+      JWT_SECRET:            ${JWT_SECRET}
+      JWT_ACCESS_EXPIRATION_MS:  ${JWT_ACCESS_EXPIRATION_MS:-900000}
+      JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS:-604800000}
+      CORS_ALLOWED_ORIGINS:  ${CORS_ALLOWED_ORIGINS:-http://localhost}
+      MAIL_HOST:             ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT:             ${MAIL_PORT:-587}
+      MAIL_USERNAME:         ${MAIL_USERNAME:-}
+      MAIL_PASSWORD:         ${MAIL_PASSWORD:-}
+      NOTIFICATION_ALERT_DAYS: ${NOTIFICATION_ALERT_DAYS:-3}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    networks:
+      - fluxa-net-prod
+
+  # ──────────────────────────────────────────────────────────
+  # Frontend — React / nginx
+  # nginx sirve los estáticos Y proxea /api/ al backend
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: fluxa-frontend:latest
+    container_name: fluxa-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - fluxa-net-prod
+
+# ──────────────────────────────────────────────────────────
+# Volúmenes persistentes
+# ──────────────────────────────────────────────────────────
+volumes:
+  fluxa_postgres_prod:
+    driver: local
+    name: fluxa_postgres_prod
+
+# ──────────────────────────────────────────────────────────
+# Red interna de producción (aislada del compose de dev)
+# ──────────────────────────────────────────────────────────
+networks:
+  fluxa-net-prod:
+    driver: bridge
+    name: fluxa-network-prod

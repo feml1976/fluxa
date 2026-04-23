@@ -8,12 +8,17 @@ import com.fml.fluxa.dashboard.application.usecase.GetDashboardSummaryUseCase;
 import com.fml.fluxa.dashboard.application.usecase.GetDebtStrategyUseCase;
 import com.fml.fluxa.dashboard.application.usecase.GetProjectionsUseCase;
 import com.fml.fluxa.shared.infrastructure.web.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Dashboard", description = "Resumen financiero mensual, proyecciones y estrategias de deuda")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/v1/dashboard")
 public class DashboardController {
@@ -30,6 +35,7 @@ public class DashboardController {
         this.debtStrategyUseCase = debtStrategyUseCase;
     }
 
+    @Operation(summary = "Resumen mensual: flujo neto, % comprometido e indicador de salud financiera")
     @GetMapping
     public ResponseEntity<ApiResponse<DashboardSummaryResponse>> getSummary(
             @AuthenticationPrincipal User user,
@@ -46,6 +52,7 @@ public class DashboardController {
         return ResponseEntity.ok(ApiResponse.ok(projectionsUseCase.getProjections(user.getId(), clamped)));
     }
 
+    @Operation(summary = "Estrategias de pago Avalanche y Snowball para liquidar deudas")
     @GetMapping("/debt-strategy")
     public ResponseEntity<ApiResponse<List<DebtStrategyResponse>>> getDebtStrategy(
             @AuthenticationPrincipal User user) {

@@ -5,6 +5,9 @@ import com.fml.fluxa.commitment.application.dto.*;
 import com.fml.fluxa.commitment.application.usecase.*;
 import com.fml.fluxa.expense.domain.model.ExpenseCategoryType;
 import com.fml.fluxa.shared.infrastructure.web.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Compromisos Fijos", description = "Arriendo, servicios públicos, seguros y otros pagos recurrentes")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/v1/commitments")
 public class CommitmentController {
