@@ -81,3 +81,10 @@ secrets/
 coverage/
 test-results/
 backend/target/surefire-reports/
+
+# ── Claude Code (configuración local del IDE) ────────────────
+.claude/
+
+# ── Archivos temporales de trabajo ───────────────────────────
+files.zip
+files/

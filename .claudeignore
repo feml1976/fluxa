@@ -1,0 +1,101 @@
+# ============================================================
+# FLUXA — .claudeignore
+# Archivos y carpetas que Claude Code debe ignorar
+# ============================================================
+
+# ── Dependencias y builds ───────────────────────────────────
+node_modules/
+dist/
+build/
+.next/
+out/
+target/
+*.class
+*.jar
+*.war
+
+# ── Vite / Frontend build artifacts ─────────────────────────
+frontend/dist/
+frontend/.vite/
+frontend/node_modules/
+
+# ── Maven local repository ───────────────────────────────────
+.m2/
+backend/target/
+
+# ── Variables de entorno (NUNCA leer credenciales reales) ───
+.env
+.env.local
+.env.production
+.env.*.local
+backend/.env
+frontend/.env.local
+
+# ── Archivos de sistema operativo ───────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# ── IDEs y editores ──────────────────────────────────────────
+.idea/
+*.iml
+.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+
+# ── Logs ────────────────────────────────────────────────────
+logs/
+*.log
+*.log.*
+log/
+
+# ── Archivos de cobertura y reportes de testing ─────────────
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+surefire-reports/
+
+# ── Archivos temporales ──────────────────────────────────────
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+
+# ── Archivos de datos sensibles (nunca leer) ─────────────────
+*.p12
+*.jks
+*.keystore
+*.pfx
+*.pem
+*.key
+*.crt
+secrets/
+
+# ── Docker volumes locales ───────────────────────────────────
+docker/volumes/
+postgres-data/
+
+# ── Archivos de migración ya ejecutados en producción ────────
+# (solo leer los pending — los executed no modificar)
+# NOTA: Claude Code PUEDE leer los .sql de migración
+# pero NUNCA modificar uno ya aplicado. Solo crear nuevos.
+
+# ── Carpetas de documentos grandes no relevantes ─────────────
+docs/assets/
+docs/images/
+*.pdf
+*.docx
+*.xlsx
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico

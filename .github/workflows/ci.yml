@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+
+  # ── Backend: compilar + tests unitarios e integración ──────────
+  backend:
+    name: Backend — Compilar y Testear
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Compilar y ejecutar tests
+        run: mvn clean test -B
+        working-directory: backend
+
+      - name: Publicar reporte Surefire
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: surefire-reports
+          path: backend/target/surefire-reports/
+          retention-days: 7
+
+  # ── Frontend: verificación de tipos y linting ──────────────────
+  frontend:
+    name: Frontend — Type Check y Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: frontend
+
+      - name: Verificar tipos TypeScript
+        run: npm run type-check
+        working-directory: frontend
+
+      - name: Verificar linting
+        run: npm run lint
+        working-directory: frontend

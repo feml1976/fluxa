@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    # H2 en modo PostgreSQL — evita incompatibilidades con los scripts Flyway
+    url: jdbc:h2:mem:fluxa_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      # Hibernate genera el esquema desde las entidades JPA (Flyway desactivado)
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  flyway:
+    # Desactivado: el DDL lo maneja ddl-auto, evitando SQL PostgreSQL-específico
+    enabled: false
+
+  mail:
+    # Sin servidor SMTP real en tests — el bean se crea pero no envía emails
+    host: localhost
+    port: 9999
+
+fluxa:
+  jwt:
+    secret: fluxa-integration-test-secret-que-debe-tener-minimo-64-caracteres-requeridos
+    access-token-expiration-ms: 900000
+    refresh-token-expiration-ms: 604800000
+  cors:
+    allowed-origins: http://localhost:5173
+  security:
+    max-login-attempts: 5
+    login-lockout-minutes: 15
+  notification:
+    alert-days-before: 3
+    from-name: "FLUXA Test"
+    scheduler-cron: "0 0 8 * * *"
+
+logging:
+  level:
+    root: WARN
+    com.fml.fluxa: INFO
+    org.springframework.security: WARN
+    org.flywaydb: WARN
