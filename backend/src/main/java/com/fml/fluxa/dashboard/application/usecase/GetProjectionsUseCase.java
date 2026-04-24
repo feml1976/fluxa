@@ -23,6 +23,7 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 @Service
 public class GetProjectionsUseCase {
@@ -162,8 +163,9 @@ public class GetProjectionsUseCase {
                 .map(c -> c.getMonthlyInstallment())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Pago mínimo de tarjetas activas
-        BigDecimal minPayments = creditCardRepo.sumMinimumPaymentsByUser(userId);
+        // Pago mínimo de tarjetas activas — puede ser null si no hay tarjetas
+        BigDecimal minPayments = Objects.requireNonNullElse(
+                creditCardRepo.sumMinimumPaymentsByUser(userId), BigDecimal.ZERO);
 
         return installments.add(minPayments);
     }

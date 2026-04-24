@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,28 +56,33 @@ public class GetDashboardSummaryUseCase {
         this.creditCardRepo = creditCardRepo;
     }
 
+    // Evita NullPointerException cuando JPA retorna null en consultas SUM sin filas
+    private static BigDecimal safe(BigDecimal value) {
+        return Objects.requireNonNullElse(value, BigDecimal.ZERO);
+    }
+
     @Transactional(readOnly = true)
     public DashboardSummaryResponse getSummary(Long userId, int month, int year) {
         // Ingresos
-        BigDecimal totalIncome = incomeRecordRepo.sumReceivedByPeriod(userId, month, year);
-        BigDecimal totalIncomeExpected = incomeRecordRepo.sumExpectedByPeriod(userId, month, year);
+        BigDecimal totalIncome = safe(incomeRecordRepo.sumReceivedByPeriod(userId, month, year));
+        BigDecimal totalIncomeExpected = safe(incomeRecordRepo.sumExpectedByPeriod(userId, month, year));
 
         // Compromisos
         var commitmentRecords = commitmentRecordRepo.findByUserIdAndPeriodMonthAndPeriodYear(userId, month, year);
-        BigDecimal totalCommitments = commitmentRecordRepo.sumEstimatedByPeriod(userId, month, year);
-        BigDecimal totalCommitmentsPaid = commitmentRecordRepo.sumPaidByPeriod(userId, month, year);
+        BigDecimal totalCommitments = safe(commitmentRecordRepo.sumEstimatedByPeriod(userId, month, year));
+        BigDecimal totalCommitmentsPaid = safe(commitmentRecordRepo.sumPaidByPeriod(userId, month, year));
         long pendingCount = commitmentRecords.stream()
                 .filter(r -> r.getStatus() == CommitmentStatus.PENDING).count();
         long overdueCount = commitmentRecords.stream()
                 .filter(r -> r.getStatus() == CommitmentStatus.OVERDUE).count();
 
         // Gastos variables
-        BigDecimal totalExpenses = expenseRepo.sumByUserAndPeriod(userId, month, year);
-        BigDecimal totalPlanned = budgetRepo.sumPlannedByPeriod(userId, month, year);
+        BigDecimal totalExpenses = safe(expenseRepo.sumByUserAndPeriod(userId, month, year));
+        BigDecimal totalPlanned = safe(budgetRepo.sumPlannedByPeriod(userId, month, year));
 
         // Obligaciones de crédito del mes (cuotas + mínimos tarjetas)
-        BigDecimal totalCreditObligations = creditRepo.sumMonthlyInstallmentsByUser(userId)
-                .add(creditCardRepo.sumMinimumPaymentsByUser(userId));
+        BigDecimal totalCreditObligations = safe(creditRepo.sumMonthlyInstallmentsByUser(userId))
+                .add(safe(creditCardRepo.sumMinimumPaymentsByUser(userId)));
 
         // Flujo neto (incluye créditos)
         BigDecimal netFlow = totalIncome.subtract(totalCommitments)
