@@ -41,7 +41,7 @@ export const DashboardPage: React.FC = () => {
   const [projMonths, setProjMonths] = useState(6);
   const [strategyTab, setStrategyTab] = useState(0);
 
-  const { data, isLoading }          = useDashboardSummary(month, year);
+  const { data, isLoading, isError }  = useDashboardSummary(month, year);
   const { data: projections }        = useDashboardProjections(projMonths);
   const { data: strategies }         = useDebtStrategies();
 
@@ -54,7 +54,21 @@ export const DashboardPage: React.FC = () => {
     return <Box display="flex" justifyContent="center" mt={6}><CircularProgress /></Box>;
   }
 
-  const d = data!;
+  if (isError || !data) {
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={8} gap={2}>
+        <WarningAmberIcon sx={{ fontSize: 48, color: 'warning.main' }} />
+        <Typography variant="h6" color="text.secondary">
+          No se pudo cargar el Dashboard
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Verifica que el backend esté corriendo y vuelve a intentarlo.
+        </Typography>
+      </Box>
+    );
+  }
+
+  const d = data;
   const healthColor  = HEALTH_COLORS[d.healthStatus];
   const netFlowPos   = d.netFlow >= 0;
   const pieData      = d.topExpenses.map(e => ({ name: e.categoryName, value: e.total }));
