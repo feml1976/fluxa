@@ -19,7 +19,22 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "      ERROR: no se pudo iniciar Docker. Verifica que Docker Desktop este corriendo." -ForegroundColor Red
     exit 1
 }
-Write-Host "      PostgreSQL listo." -ForegroundColor Green
+
+# Esperar a que el contenedor pase el healthcheck antes de continuar
+Write-Host "      Esperando healthcheck de PostgreSQL..." -ForegroundColor DarkGray
+$maxWait = 60
+$elapsed  = 0
+do {
+    Start-Sleep -Seconds 2
+    $elapsed += 2
+    $health = docker inspect --format="{{.State.Health.Status}}" fluxa-postgres 2>$null
+} while ($health -ne "healthy" -and $elapsed -lt $maxWait)
+
+if ($health -ne "healthy") {
+    Write-Host "      ERROR: PostgreSQL no alcanzo estado healthy en ${maxWait}s. Revisa: docker logs fluxa-postgres" -ForegroundColor Red
+    exit 1
+}
+Write-Host "      PostgreSQL healthy. ($elapsed s)" -ForegroundColor Green
 Write-Host ""
 
 # ── 2. Backend ────────────────────────────────────────────

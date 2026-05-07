@@ -43,10 +43,13 @@ Write-Host ""
 # ── 3. PostgreSQL ─────────────────────────────────────────
 Write-Host "[3/3] Deteniendo PostgreSQL (Docker)..." -ForegroundColor Yellow
 docker-compose down
-if ($LASTEXITCODE -eq 0) {
+# Verificar estado real del contenedor en lugar de depender del exit code
+# (docker-compose escribe a stderr aunque el comando sea exitoso)
+$running = docker ps --filter "name=fluxa-postgres" --format "{{.Names}}" 2>$null
+if (-not $running) {
     Write-Host "      PostgreSQL detenido." -ForegroundColor Green
 } else {
-    Write-Host "      Advertencia: docker-compose down retorno un error." -ForegroundColor DarkYellow
+    Write-Host "      Advertencia: el contenedor fluxa-postgres sigue corriendo. Revisa: docker ps" -ForegroundColor DarkYellow
 }
 Write-Host ""
 
