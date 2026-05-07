@@ -10,14 +10,14 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 5177,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8087',
         changeOrigin: true,
         // Fija el Origin que ve el backend para que coincida con el CORS permitido,
         // independientemente del puerto que use Vite en cada arranque
-        headers: { origin: 'http://localhost:5173' },
+        headers: { origin: 'http://localhost:5177' },
       },
     },
   },

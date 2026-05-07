@@ -30,7 +30,7 @@ fluxa:
     access-token-expiration-ms: 900000
     refresh-token-expiration-ms: 604800000
   cors:
-    allowed-origins: http://localhost:5173
+    allowed-origins: http://localhost:5177
   security:
     max-login-attempts: 5
     login-lockout-minutes: 15

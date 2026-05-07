@@ -62,7 +62,7 @@ POSTGRES_PORT=5432
 DB_URL=jdbc:postgresql://localhost:5432/fluxa_db
 DB_USERNAME=fluxa_user
 DB_PASSWORD=fluxa_local_pass
-SERVER_PORT=8080
+SERVER_PORT=8087
 
 # ── JWT (mínimo 64 caracteres) ─────────────────────────
 JWT_SECRET=fluxa-dev-secret-key-para-desarrollo-local-minimo-64-caracteres-requerido
@@ -70,7 +70,7 @@ JWT_ACCESS_EXPIRATION_MS=900000
 JWT_REFRESH_EXPIRATION_MS=604800000
 
 # ── CORS ───────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS=http://localhost:5173
+CORS_ALLOWED_ORIGINS=http://localhost:5177
 
 # ── Email (opcional para desarrollo) ───────────────────
 MAIL_HOST=smtp.gmail.com
@@ -193,44 +193,44 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=local"
 
 ```bash
 # Health check
-curl http://localhost:8080/actuator/health
+curl http://localhost:8087/actuator/health
 # Respuesta esperada: {"status":"UP"}
 ```
 
-También puedes abrir en el navegador: `http://localhost:8080/actuator/health`
+También puedes abrir en el navegador: `http://localhost:8087/actuator/health`
 
 ### 5.5 Documentación interactiva — Swagger UI
 
 Una vez el backend esté corriendo, accede a la documentación completa de la API en:
 
 ```
-http://localhost:8080/swagger-ui.html
+http://localhost:8087/swagger-ui.html
 ```
 
 Desde ahí puedes explorar todos los endpoints, ver los schemas de request/response y ejecutar llamadas directamente. Para endpoints protegidos, usa el botón **Authorize** e ingresa el token JWT obtenido en `/api/v1/auth/login`.
 
 El JSON de la especificación OpenAPI está disponible en:
 ```
-http://localhost:8080/v3/api-docs
+http://localhost:8087/v3/api-docs
 ```
 
 ### 5.6 Endpoints principales
 
 | Módulo | Base URL |
 |---|---|
-| Autenticación | `http://localhost:8080/api/v1/auth` |
-| Ingresos | `http://localhost:8080/api/v1/income` |
-| Compromisos Fijos | `http://localhost:8080/api/v1/commitments` |
-| Gastos Variables | `http://localhost:8080/api/v1/expenses` |
-| Créditos | `http://localhost:8080/api/v1/credits` |
-| Dashboard | `http://localhost:8080/api/v1/dashboard` |
-| Notificaciones | `http://localhost:8080/api/v1/notifications` |
-| Importación | `http://localhost:8080/api/v1/import` |
+| Autenticación | `http://localhost:8087/api/v1/auth` |
+| Ingresos | `http://localhost:8087/api/v1/income` |
+| Compromisos Fijos | `http://localhost:8087/api/v1/commitments` |
+| Gastos Variables | `http://localhost:8087/api/v1/expenses` |
+| Créditos | `http://localhost:8087/api/v1/credits` |
+| Dashboard | `http://localhost:8087/api/v1/dashboard` |
+| Notificaciones | `http://localhost:8087/api/v1/notifications` |
+| Importación | `http://localhost:8087/api/v1/import` |
 
 ### 5.7 Registro del primer usuario
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
+curl -X POST http://localhost:8087/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "Francisco",
@@ -246,7 +246,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 |---|---|---|
 | `Connection refused: localhost:5432` | PostgreSQL no está corriendo | Ejecutar `docker-compose up -d` |
 | `FlywayException: validate failed` | Migración inconsistente | Revisar scripts en `db/migration/` |
-| `Port 8080 already in use` | Otro proceso usa el puerto | `lsof -i :8080` y terminar el proceso |
+| `Port 8087 already in use` | Otro proceso usa el puerto | `lsof -i :8087` y terminar el proceso |
 | `JWT secret too short` | Secret < 64 caracteres | Actualizar `JWT_SECRET` en `.env` |
 | `ddl-auto: validate` falla | Entidad no coincide con tabla | Crear script Flyway de corrección |
 
@@ -263,7 +263,7 @@ cd frontend
 ### 6.1 Variables de entorno del Frontend
 
 El frontend usa URLs relativas (`/api/v1`) — no requiere configurar la URL del backend.
-En desarrollo, Vite proxea automáticamente `/api/*` a `http://localhost:8080` (configurado en `vite.config.ts`).
+En desarrollo, Vite proxea automáticamente `/api/*` a `http://localhost:8087` (configurado en `vite.config.ts`).
 
 ### 6.2 Instalar dependencias
 
@@ -279,7 +279,7 @@ La primera instalación puede tardar 1-2 minutos.
 npm run dev
 ```
 
-La aplicación estará disponible en: `http://localhost:5173`
+La aplicación estará disponible en: `http://localhost:5177`
 
 Vite tiene recarga automática (HMR) — los cambios en el código se reflejan al instante sin necesidad de reiniciar.
 
@@ -319,7 +319,7 @@ El resultado queda en `frontend/dist/`.
 | `401 Unauthorized` en todas las llamadas | Token expirado | Hacer logout y login nuevamente |
 | `CORS error` en consola | Backend no acepta el origen | Verificar `CORS_ALLOWED_ORIGINS` en `.env` |
 | `Cannot find module` | Dependencias no instaladas | Ejecutar `npm install` |
-| Puerto 5173 ocupado | Otro proceso activo | Vite usa el siguiente puerto disponible automáticamente |
+| Puerto 5177 ocupado | Otro proceso activo | Vite usa el siguiente puerto disponible automáticamente |
 | Error de TypeScript en `npm run build` | Tipos incorrectos en el código | Ejecutar `npm run type-check` para ver el detalle |
 
 ---
@@ -331,9 +331,9 @@ Sigue este orden cada vez que inicies el entorno de desarrollo:
 ```
 1. Iniciar Docker Desktop (si no está corriendo)
 2. docker-compose up -d          ← PostgreSQL
-3. cd backend && mvn spring-boot:run    ← Backend en puerto 8080
-4. cd frontend && npm run dev          ← Frontend en puerto 5173
-5. Abrir http://localhost:5173
+3. cd backend && mvn spring-boot:run    ← Backend en puerto 8087
+4. cd frontend && npm run dev          ← Frontend en puerto 5177
+5. Abrir http://localhost:5177
 ```
 
 ---
@@ -362,7 +362,7 @@ fluxa/
     ├── .dockerignore
     ├── nginx.conf                ← SPA routing + proxy /api/ → backend
     ├── package.json              ← Dependencias npm
-    ├── vite.config.ts            ← Proxy de desarrollo a localhost:8080
+    ├── vite.config.ts            ← Proxy de desarrollo a localhost:8087
     └── src/
         ├── modules/              ← Módulos de la aplicación
         ├── shared/               ← Componentes y utilidades comunes
@@ -440,10 +440,10 @@ Browser
   ▼
 nginx (frontend)
   ├── /              → sirve index.html + assets (React SPA)
-  └── /api/*         → proxy a backend:8080/api/*
+  └── /api/*         → proxy a backend:8087/api/*
                             │
                             ▼
-                     Spring Boot (backend:8080)
+                     Spring Boot (backend:8087)
                             │
                             ▼
                      PostgreSQL (postgres:5432)
@@ -475,7 +475,7 @@ mvn test -Dtest=CreditAnalysisUseCaseTest  # Test específico
 # ── Frontend ───────────────────────────────────────────
 cd frontend
 npm install                             # Instalar dependencias
-npm run dev                             # Servidor de desarrollo (puerto 5173)
+npm run dev                             # Servidor de desarrollo (puerto 5177)
 npm run type-check                      # Verificar tipos TS
 npm run build                           # Build de producción (tsc + vite)
 npm run lint                            # Verificar linting

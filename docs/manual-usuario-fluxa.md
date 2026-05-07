@@ -43,7 +43,7 @@ Todos los valores están expresados en **pesos colombianos (COP)**. No hay sopor
 
 ### Pasos para crear su cuenta
 
-1. Abra su navegador web y vaya a la dirección: `http://localhost:5173` (o la URL que le haya indicado su administrador).
+1. Abra su navegador web y vaya a la dirección: `http://localhost:5177` (o la URL que le haya indicado su administrador).
 2. Verá la pantalla de inicio de sesión. Busque el enlace **"Regístrate aquí"** que aparece debajo del botón de ingreso y haga clic en él.
 3. Será redirigido al formulario de registro. Complete los siguientes campos:
 

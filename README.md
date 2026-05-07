@@ -99,7 +99,7 @@ fluxa:
   jwt:
     secret: fluxa-local-secret-minimo-64-caracteres-para-firma-hs512-desarrollo
   cors:
-    allowed-origins: http://localhost:5173
+    allowed-origins: http://localhost:5177
 
 management:
   health:
@@ -130,10 +130,10 @@ npm run dev
 
 | Servicio | URL |
 |---|---|
-| Frontend (Vite) | http://localhost:5173 |
-| Backend (API) | http://localhost:8080/api/v1 |
-| Swagger UI | http://localhost:8080/swagger-ui.html |
-| Health check | http://localhost:8080/actuator/health |
+| Frontend (Vite) | http://localhost:5177 |
+| Backend (API) | http://localhost:8087/api/v1 |
+| Swagger UI | http://localhost:8087/swagger-ui.html |
+| Health check | http://localhost:8087/actuator/health |
 | pgAdmin (opcional) | http://localhost:5050 |
 
 Para levantar pgAdmin:
