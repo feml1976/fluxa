@@ -326,12 +326,34 @@ El resultado queda en `frontend/dist/`.
 
 ## 7. Orden de Inicio Recomendado
 
-Sigue este orden cada vez que inicies el entorno de desarrollo:
+### Opción A — Scripts automáticos (recomendado)
+
+Desde PowerShell, en la raíz del proyecto:
+
+```powershell
+# Levantar toda la aplicación (Docker + Backend + Frontend)
+.\start-fluxa.ps1
+
+# Detener toda la aplicación
+.\stop-fluxa.ps1
+```
+
+Los scripts se encargan de levantar PostgreSQL, abrir una ventana independiente por cada
+servicio y mostrar las URLs de acceso al finalizar.
+
+> **Requisito previo (una sola vez):** si PowerShell bloquea la ejecución de scripts,
+> ejecuta `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
+
+---
+
+### Opción B — Inicio manual paso a paso
+
+Sigue este orden si prefieres controlar cada servicio por separado:
 
 ```
 1. Iniciar Docker Desktop (si no está corriendo)
-2. docker-compose up -d          ← PostgreSQL
-3. cd backend && mvn spring-boot:run    ← Backend en puerto 8087
+2. docker-compose up -d                ← PostgreSQL
+3. cd backend && mvn spring-boot:run   ← Backend en puerto 8087
 4. cd frontend && npm run dev          ← Frontend en puerto 5177
 5. Abrir http://localhost:5177
 ```
@@ -344,6 +366,8 @@ Sigue este orden cada vez que inicies el entorno de desarrollo:
 fluxa/
 ├── .env                          ← Variables de entorno (NO commitear)
 ├── .env.example                  ← Plantilla de variables
+├── start-fluxa.ps1               ← Levanta Docker + Backend + Frontend (PowerShell)
+├── stop-fluxa.ps1                ← Detiene todos los servicios (PowerShell)
 ├── docker-compose.yml            ← Infraestructura local (solo PostgreSQL)
 ├── docker-compose.prod.yml       ← Producción (PostgreSQL + Backend + Frontend)
 ├── docker/
